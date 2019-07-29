@@ -99,7 +99,18 @@ const repayBNB = async (api, amount) => {
 	let CONFIG = JSON.parse(fs.readFileSync(configFile, 'utf8'));
 
 	let binanceApi = api(CONFIG.apiKey, CONFIG.apiSecret);
-	
+
+	// Get margin account details
+	marginDetails = await binanceApi.marginDetails();
+	//console.log(marginDetails);
+
+    marginDetails.data.userAssets.forEach(function(element) {
+         //console.log(element);
+        if (element.asset == 'BNB')
+            marginBnbBalance = parseFloat(element.free, 0);
+    });
+	console.log("Margin BNB Balance", marginBnbBalance);
+
 	let dateLoan = new Date();
 	dateLoan.setUTCHours(23);
 	dateLoan.setUTCMinutes(30);
@@ -124,10 +135,17 @@ const repayBNB = async (api, amount) => {
 		loanAmount = CONFIG.loanAmount;
 		loanHours = 2;
 	}
-	repayAmount = loanAmount + (loanAmount * loanHourlyRate * loanHours);
+	interest = loanAmount * loanHourlyRate * loanHours;
+	repayAmount = loanAmount + interest;
 
 	console.log('loanAmount', loanAmount);
 	console.log('repayAmount', repayAmount);
+	console.log('Interest', interest);
+
+	if (marginBnbBalance < interest) {
+		console.log(chalk.inverse.red('ERROR. BNB balance not sufficient to repay.'));
+		return false;
+	}
 	
 	let msRemainingLoan = dateLoan - moment().valueOf();
 	

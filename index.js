@@ -94,6 +94,7 @@ const repayBNB = async (api, amount) => {
 (async function main(configFile) {
 
 	console.clear();
+	console.log('configFile', configFile);
 
 	// Load the config file
 	let CONFIG = JSON.parse(fs.readFileSync(configFile, 'utf8'));
@@ -111,13 +112,25 @@ const repayBNB = async (api, amount) => {
     });
 	console.log("Margin BNB Balance", marginBnbBalance);
 
+
+/*
+	marginLoanInfo = await binanceApi.marginLoanInfo('BNB', '');
+	console.log('marginLoanInfo', marginLoanInfo.data);
+    marginLoanInfo.data.rows.forEach(function(element) {
+		//console.log(element);
+	   if (element.asset == 'BNB' || element.status == 'PENDING')
+		   marginBnbBalance = parseFloat(element.free, 0);
+   });
+
+	return;
+*/
+
 	let dateLoan = new Date();
 	dateLoan.setUTCHours(23);
-	dateLoan.setUTCMinutes(30);
-	dateLoan.setUTCSeconds(0);
+	dateLoan.setUTCMinutes(45);
 	//console.log(dateLoan.toUTCString());
 	
-	let dateRepay = new Date(dateLoan.getTime() + (1000*60*45));
+	let dateRepay = new Date(dateLoan.getTime() + (1000*60*20)); // Add 20 minutes
 	//console.log(dateRepay.toUTCString());
 	
 	//Sat, 27 Jul 2019 23:30:00 GMT
@@ -189,7 +202,7 @@ const repayBNB = async (api, amount) => {
 						//await delay(1000);
 
 						// Repay loan
-						repayBNB(binanceApi, loanAmount + (1 * 0.0125)/100);
+						repayBNB(binanceApi, repayAmount);
 					}
 	
 				}, Math.max(0, msRemainingRepay));

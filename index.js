@@ -38,6 +38,7 @@ const loanBNB = async (api, amount) => {
 		return await promise;
 	} else {
 		state.marginLoanTranId = response.data.tranId;
+		log(chalk.inverse.green(`Success. tranId: ${state.marginLoanTranId}`));
 		return response;
 	}
 }
@@ -62,6 +63,7 @@ const transferBNB = async (api, amount, type) => {
 	} else {
 		state.marginTransferTranId = response.data.tranId;
 		state.marginTransferRetries = 0;
+		log(chalk.inverse.green(`Success. tranId: ${state.marginTransferTranId}`));
 		return response;
 	}
 }
@@ -86,6 +88,7 @@ const repayBNB = async (api, amount) => {
 	} else {
 		state.marginRepayTranId = response.data.tranId;
 		state.marginRepayRetries = 0;
+		log(chalk.inverse.green(`Success. tranId: ${state.marginRepayTranId}`));
 		return response;
 	}
 }
@@ -105,6 +108,7 @@ const repayBNB = async (api, amount) => {
 	marginDetails = await binanceApi.marginDetails();
 	//console.log(marginDetails);
 
+	let marginBnbBalance = 0;
     marginDetails.data.userAssets.forEach(function(element) {
          //console.log(element);
         if (element.asset == 'BNB')
@@ -128,13 +132,8 @@ const repayBNB = async (api, amount) => {
 	let dateLoan = new Date();
 	dateLoan.setUTCHours(23);
 	dateLoan.setUTCMinutes(45);
-	//console.log(dateLoan.toUTCString());
 	
 	let dateRepay = new Date(dateLoan.getTime() + (1000*60*20)); // Add 20 minutes
-	//console.log(dateRepay.toUTCString());
-	
-	//Sat, 27 Jul 2019 23:30:00 GMT
-	//Sun, 28 Jul 2019 00:15:00 GMT
 	
 	loanHourlyRate = 0.0125 / 100;
 	// Test mode
@@ -175,14 +174,10 @@ const repayBNB = async (api, amount) => {
 	
 		//Loan BNB
 		response = await loanBNB(binanceApi, loanAmount);
-		//log(chalk.inverse.yellow(`Loaning BNB`));
-		//response = await binanceApi.marginLoan('BNB', 1);
-		//console.log('marginLoan', response);
 		if (!response.success) {
 			throw `Unable to loan BNB. Error: ${response.data.msg}`;
 		} else {
 			// Transfer to exchange account
-			//await delay(1000);
 			response = await transferBNB(binanceApi, loanAmount, 2);
 			if (!response.success) {
 				throw `Unable to transfer BNB. Error: ${response.data.msg}`;
@@ -199,8 +194,6 @@ const repayBNB = async (api, amount) => {
 					if (!response.success) {
 						throw `Unable to transfer BNB. Error: ${response.data.msg}`;
 					} else {
-						//await delay(1000);
-
 						// Repay loan
 						repayBNB(binanceApi, repayAmount);
 					}

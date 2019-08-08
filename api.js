@@ -10,9 +10,11 @@ const API_ENDPOINTS = {
     'PLACE_ORDER': 'https://api.binance.com/api/v3/order',
     'CANCEL_ORDER': 'https://api.binance.com/api/v3/order',
     'TEST_ORDER': 'https://api.binance.com/api/v3/order/test',
+    'MARGIN_DETAILS': 'https://api.binance.com/sapi/v1/margin/account',
     'MARGIN_LOAN': 'https://api.binance.com/sapi/v1/margin/loan',
     'MARGIN_REPAY': 'https://api.binance.com/sapi/v1/margin/repay',
-    'MARGIN_TRANSFER': 'https://api.binance.com/sapi/v1/margin/transfer'
+    'MARGIN_TRANSFER': 'https://api.binance.com/sapi/v1/margin/transfer',
+    'MARGIN_ASSET': 'https://api.binance.com/sapi/v1/margin/asset'
 };
 
 const api = (key, secret) => {
@@ -128,6 +130,18 @@ const api = (key, secret) => {
             return await sendRequest(options);
         },
 
+        marginDetails: async() => {
+            const options = {
+                url: API_ENDPOINTS['MARGIN_DETAILS'],
+                method: 'GET',
+                headers: {
+                    'X-MBX-APIKEY': apiKey
+                },
+                forever: true
+            };
+            return await sendRequest(options);
+        },
+
         marginLoan: async(asset, amount) => {
             const timestamp = moment().valueOf();
             let requestBody = `asset=${asset}&amount=${amount}&timestamp=${timestamp}`;
@@ -184,6 +198,29 @@ const api = (key, secret) => {
             //console.log(options);
             return await sendRequest(options);
         }
+
+/*
+        marginLoanInfo: async(asset, txId) => {
+
+            let startTime = new Date().getTime() - 1000*60*60;
+            console.log('startTime', startTime);
+
+            const timestamp = moment().valueOf();
+            let parameters = `asset=${asset}&txId=${txId}&startTime=${startTime}&timestamp=${timestamp}`;
+            const sign = crypto.createHmac('sha256', apiSecret).update(parameters).digest('hex');
+            parameters = `${parameters}&signature=${sign}`;
+
+            const options = {
+                url: `${API_ENDPOINTS['MARGIN_LOAN']}?${parameters}`,
+                method: 'GET',
+                headers: {
+                    'X-MBX-APIKEY': apiKey
+                },
+                forever: true
+            };
+            return await sendRequest(options);
+        }
+*/
 
     };
 };
